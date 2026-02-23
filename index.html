@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Çığ Simülasyonu (Web)</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#0b1220; }
+    #hud{
+      position:fixed; left:12px; top:12px; color:#fff; font-family:system-ui;
+      background:rgba(0,0,0,.35); padding:10px 12px; border-radius:12px;
+      user-select:none; line-height:1.35;
+    }
+    #hud b{ display:block; margin-bottom:6px; }
+    #hud .small{ opacity:.85; font-size:13px; }
+
+    .load-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      transition: all 0.15s;
+    }
+    .load-btn:hover { background: rgba(255,255,255,0.25); }
+    .load-btn.active { border-color: #7eb8ff; background: rgba(126,184,255,0.25); }
+  </style>
+</head>
+<body>
+<div id="hud">
+  <b>Çığ Simülasyonu (MVP)</b>
+
+  <div class="small" style="margin-bottom:8px;">
+    Sol tık: kar bırak • R: reset
+  </div>
+
+  <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
+    <input id="lat" placeholder="lat" value="38.129" style="width:90px; padding:6px; border-radius:8px; border:none;">
+    <input id="lon" placeholder="lon" value="42.808" style="width:90px; padding:6px; border-radius:8px; border:none;">
+    <button id="load" style="padding:6px 10px; border-radius:10px; border:none; cursor:pointer;">Arazi Yükle</button>
+  </div>
+
+  <div class="small" style="margin-bottom:5px;">Yük Miktarı</div>
+  <div style="display:flex; gap:6px;">
+    <button class="load-btn active" data-amount="8.0">Düşük</button>
+    <button class="load-btn" data-amount="18.0">Orta</button>
+    <button class="load-btn" data-amount="40.0">Yüksek</button>
+  </div>
+
+  <div id="status" class="small" style="margin-top:8px; opacity:.9;">Hazır</div>
+</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>
