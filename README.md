@@ -1,80 +1,154 @@
+# Avalanche Simulation — Shallow Water (Saint-Venant) Model
 
-Avalanche Simulation — Shallow Water (Saint-Venant) Model
-This project implements a real-time two-dimensional snow avalanche simulation using a simplified form of the Saint-Venant equations solved with semi-Lagrangian advection.
-The objective is to simulate gravity-driven snow flow over real terrain loaded from a GeoTIFF digital elevation model.
+This project implements a real-time two-dimensional snow avalanche simulation using a simplified form of the Saint-Venant (Shallow Water) equations solved with semi-Lagrangian advection.
 
-Model Overview
-The simulation is based on the Shallow Water Equations (SWE), which describe:
+The objective is to simulate gravity-driven snow flow over real terrain loaded from a GeoTIFF digital elevation model (DEM).
 
-Mass conservation
-Momentum conservation in the x-direction
-Momentum conservation in the y-direction
+---
 
-The state variables are:
+## Model Overview
 
-h  — snow depth
-u  — velocity in the x-direction
-v  — velocity in the y-direction
-Z  — terrain elevation (static, loaded from DEM)
+The simulation is based on the depth-averaged Shallow Water Equations (SWE), adapted to represent dense snow flow over terrain.
 
-Flow is driven by the terrain gradient:
+The governing principles include:
 
-g = 9.81
-Explicit time stepping
-CFL-based dynamic stability control
+- Mass conservation  
+- Momentum conservation in the x-direction  
+- Momentum conservation in the y-direction  
 
+### State Variables
 
-Numerical Method
-Spatial discretization:
+- `h` — snow depth  
+- `u` — velocity in the x-direction  
+- `v` — velocity in the y-direction  
+- `Z` — terrain elevation (static, loaded from DEM)
 
-Uniform Cartesian grid
-Resolution: N x N mesh (N = 128)
-Cell spacing: dx = SIZE / (N - 1)
+Flow acceleration is driven by terrain slope:
 
-Momentum update (central difference terrain gradient):
-u += dt * (-g * dZ/dx - friction * u)
+- g = 9.81  
+- Explicit time stepping  
+- CFL-based dynamic stability control  
+
+---
+
+## Numerical Method
+
+### Spatial Discretization
+
+- Uniform Cartesian grid  
+- Resolution: N × N mesh (N = 128)  
+- Cell spacing: dx = SIZE / (N - 1)
+
+### Momentum Update
+
+Terrain gradient forces are computed using central differences:
+
+u += dt * (-g * dZ/dx - friction * u)  
 v += dt * (-g * dZ/dy - friction * v)
-Advection:
 
-Semi-Lagrangian scheme (backward particle tracing)
-Bilinear interpolation for sub-cell accuracy
-Small damping factor (0.999) applied per step for numerical stability
+A linear friction term is included to approximate basal resistance.
 
-Stability:
+### Advection Scheme
 
-Dynamic time step computed each frame via CFL condition:
+- Semi-Lagrangian advection (backward particle tracing)  
+- Bilinear interpolation for sub-cell sampling  
+- Small damping factor (0.999) applied per step for numerical stability  
 
-dt = CFL * dx / max_speed
+### Stability
+
+The time step is dynamically computed using a CFL condition:
+
+dt = CFL * dx / max_speed  
 dt = min(dt, 0.05)
-Boundary treatment:
 
-Fixed zero boundary: snow depth set to zero at all edges
+This ensures stable explicit time integration under varying flow speeds.
 
+### Boundary Conditions
 
-Terrain Model
-Terrain elevation is loaded at runtime from a SRTM GeoTIFF file via a Python backend:
+- Fixed zero boundary condition  
+- Snow depth is set to zero at all domain edges  
 
-The backend reads a region around a given latitude/longitude coordinate
-Elevation values are normalized and scaled for visualization
-Vertical exaggeration is applied to emphasize slope features
+---
 
-Barriers are implemented by raising terrain elevation in selected cells, which creates a local gradient that deflects the flow.
+## Terrain Model
 
-Snow Source Model
-Snow is added interactively by clicking on the terrain:
+Terrain elevation is loaded at runtime from an SRTM GeoTIFF file via a Python backend service.
 
-A Gaussian distribution is applied around the click point
-Multiple load presets are available (light, medium, heavy)
-The simulation begins propagating immediately upon addition
+The backend:
 
+- Extracts a region around a given latitude/longitude  
+- Reads elevation values from DEM  
+- Normalizes and scales elevation for rendering  
+- Applies vertical exaggeration to emphasize slope gradients  
 
-Visualization
-Rendering is performed using Three.js:
+Barriers are implemented by locally increasing terrain elevation values, generating deflection in snow flow through modified gradients.
 
-Two mesh layers: terrain (static) and snow (dynamic)
-Snow mesh vertex heights are updated each frame from h
-Heatmap mode: vertex colors encode momentum magnitude h * sqrt(u^2 + v^2)
-Momentum color scale: blue (low) to yellow to red (high)
-Spherical camera system with directional controls
+---
 
-uvicorn app:app --reload --port 8010
+## Snow Source Model
+
+Snow loading is interactive:
+
+- User clicks inject snow mass onto terrain  
+- A Gaussian distribution is applied around the selected point  
+- Multiple load presets are available (light, medium, heavy)  
+- Flow propagation begins immediately after injection  
+
+---
+
+## Visualization
+
+Rendering is implemented using Three.js.
+
+### Mesh Structure
+
+- Terrain mesh (static)  
+- Snow mesh (dynamic height field)  
+
+Snow vertex positions are updated each frame using the depth field `h`.
+
+### Heatmap Mode
+
+Momentum magnitude is visualized via vertex coloring:
+
+momentum = h * sqrt(u² + v²)
+
+Color scale:
+- Blue — low momentum  
+- Yellow — medium momentum  
+- Red — high momentum  
+
+### Camera System
+
+- Spherical orbit camera  
+- Directional controls  
+- Real-time interactive navigation  
+
+---
+
+## Physical Scope and Limitations
+
+This model represents depth-averaged gravity-driven snow flow.
+
+It does not include:
+
+- Granular rheology models (e.g., Voellmy or μ(I) formulations)  
+- Turbulent suspension effects  
+- Snow entrainment processes  
+- Three-dimensional powder cloud dynamics  
+- Shock-capturing Riemann solvers  
+
+The simulation is intended as a computational demonstration of terrain-driven shallow flow rather than a fully validated avalanche hazard model.
+
+---
+
+## Purpose
+
+This project serves as:
+
+- A numerical PDE demonstration  
+- A real-time terrain-coupled shallow flow simulator  
+- A computational prototype for avalanche dynamics  
+- An educational exploration of semi-Lagrangian advection and CFL stability control  
+
+---
